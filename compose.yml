@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 123
+    volumes:
+      - type: bind
+        source: ./postgres_data
+        target: "/var/lib/postgresql/data"
+    ports:
+      - '5432:5432'
