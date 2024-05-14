@@ -1,11 +1,13 @@
-package dev.sstol.psh.example2;
+package dev.sstol.psh.ex3_onetomany;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +40,11 @@ public class BooksOwnersApp {
       Owner owner1 = new Owner(0, "Owner1", List.of(book1, book3));
       Owner owner2 = new Owner(0, "Owner2", List.of(book2, book4));
 
+      book1.setOwner(owner1);
+      book3.setOwner(owner1);
+      book2.setOwner(owner2);
+      book4.setOwner(owner2);
+
       session.persist(book1);
       session.persist(book2);
       session.persist(book3);
@@ -48,6 +55,17 @@ public class BooksOwnersApp {
 
       tx1.commit();
       session.close();
+
+      System.out.println("****** GET OWNERS *******");
+      session = sessionFactory.openSession();
+      session.createQuery("from Owner").list().forEach(System.out::println);
+      session.close();
+
+      System.out.println("****** GET BOOKS *******");
+      session = sessionFactory.openSession();
+      session.createQuery("from Book").list().forEach(System.out::println);
+      session.close();
+      sessionFactory.close();
    }
 }
 
@@ -56,7 +74,8 @@ public class BooksOwnersApp {
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Entity(name = "owners_")
+@Table(name = "owners_")
+@Entity
 class Owner {
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,6 +85,30 @@ class Owner {
 
    @OneToMany(mappedBy = "owner")
    List<Book> books;
+
+   private String getBooksAsString() {
+      if (getBooks() == null) {
+         return "null";
+      }
+      StringBuilder builder = new StringBuilder();
+      builder.append("(");
+      for (Book book : books) {
+         builder.append(book.getTitle()).append(", ");
+      }
+      builder.delete(builder.length() - 2, builder.length());
+      builder.append(")");
+      return builder.toString();
+   }
+
+   @Override
+   public String toString() {
+      return """
+        Owner{\
+        id=%s, \
+        name=%s, \
+        books=%s\
+        }""".formatted(getId(), getName(), getBooksAsString());
+   }
 }
 
 @Data
@@ -73,7 +116,8 @@ class Owner {
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Entity(name = "books_")
+@Entity
+@Table(name = "books_")
 class Book {
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -82,5 +126,16 @@ class Book {
    private String title;
 
    @ManyToOne
+   @JoinColumn(name = "owner_id")
    Owner owner;
+
+   @Override
+   public String toString() {
+      return """
+        Book{\
+        id=%s \
+        title=%s \
+        owner=%s \
+        }""".formatted(getId(), getTitle(), getOwner() == null ? "null" : getOwner().getName());
+   }
 }
