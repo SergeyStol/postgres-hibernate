@@ -1,4 +1,4 @@
-package dev.sstol.psh.ex2_manytoone;
+package dev.sstol.psh.ex3_manytoone;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

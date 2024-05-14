@@ -1,4 +1,4 @@
-package dev.sstol.psh.ex3_onetomany;
+package dev.sstol.psh.ex4_onetomany;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
