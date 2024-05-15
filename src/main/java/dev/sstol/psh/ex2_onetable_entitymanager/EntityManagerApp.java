@@ -15,23 +15,33 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-/**
- * @author Sergey Stol
- * 2024-05-14
- */
+import java.util.List;
+
 public class EntityManagerApp {
    public static void main(String[] args) {
-      EntityManagerFactory emf = Persistence.createEntityManagerFactory("tmp");
+      EntityManagerFactory emf =
+        Persistence.createEntityManagerFactory("tmp");
 
       EntityManager entityManager = emf.createEntityManager();
       EntityTransaction tx = entityManager.getTransaction();
       tx.begin();
 
-      Worker user1 = new Worker(0, "Name1");
-
-      entityManager.persist(user1);
+      Worker worker1 = new Worker(0, "Name1");
+      Worker worker2 = new Worker(0, "Name2");
+      Worker worker3 = new Worker(0, "Name3");
+      entityManager.persist(worker1);
+      entityManager.persist(worker2);
+      entityManager.persist(worker3);
 
       tx.commit();
+      entityManager.close();
+
+      entityManager = emf.createEntityManager();
+      List<Worker> workers = entityManager
+        .createQuery("from Worker", Worker.class).getResultList();
+      workers.forEach(System.out::println);
+      entityManager.close();
+
       emf.close();
    }
 }
